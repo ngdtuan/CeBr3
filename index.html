@@ -193,8 +193,16 @@ table{min-width:720px}
   .cfg-panel{padding:10px;margin-bottom:12px;border-radius:12px}
   .cfg-grid{grid-template-columns:1fr;gap:10px}
   .cfg-box{padding:10px;border-radius:10px}
-  .cfg-stdtbl{display:block;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
-  .cfg-stdtbl input{width:90px}
+  /* Mobile fix: bảng Tham số chuẩn IAEA chuyển thành card, không cuộn ngang */
+  .cfg-stdtbl{display:block;max-width:100%;min-width:0!important;border-collapse:separate;overflow:visible}
+  .cfg-stdtbl thead{display:none}
+  .cfg-stdtbl tbody{display:block;width:100%;max-width:100%}
+  .cfg-stdtbl tr{display:grid;grid-template-columns:1fr;gap:8px;width:100%;max-width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin:9px 0}
+  .cfg-stdtbl td{display:block;width:100%;max-width:100%;border:0!important;padding:0!important;text-align:left!important;font-family:inherit}
+  .cfg-stdtbl td:first-child{font-size:14px;font-weight:750;color:#0f766e;background:#ecfeff;border-radius:9px;padding:8px 10px!important}
+  .cfg-stdtbl td:nth-child(2)::before{content:'Hoạt độ (Bq/kg)';display:block;margin:0 0 4px;color:#475569;font-size:12px;font-weight:650}
+  .cfg-stdtbl td:nth-child(3)::before{content:'Khối lượng chuẩn (kg)';display:block;margin:0 0 4px;color:#475569;font-size:12px;font-weight:650}
+  .cfg-stdtbl input{width:100%!important;max-width:100%!important;min-height:42px;text-align:left!important;font-size:16px;border-radius:10px}
   main{display:flex!important;flex-direction:column;gap:0;padding:10px var(--mobile-pad) 24px;max-width:100%;width:100%}
   main>section{width:100%;min-width:0}
   .card{padding:12px;border-radius:14px;margin-bottom:12px;box-shadow:0 1px 6px rgba(15,23,42,.04)}
@@ -230,6 +238,18 @@ table{min-width:720px}
   :root{--ink:#e5e7eb;--muted:#cbd5e1;--line:#334155;--bg:#0f172a}
   body{background:#0f172a;color:#e5e7eb}.card,.sc,.tbl,.cfg-panel,.cfg-box,.filebar,.modal{background:#111827;border-color:#334155}.cfg-stat{background:#111827;border-color:#334155}.dz{background:#111827;border-color:#475569}.dz:hover{background:#164e63}.head .unit,.note-i,.foot,.cfg-note,.cfg-mini,.cfg-help,.cfg-dirbar,label.row>span{color:#cbd5e1} input,select,textarea{background:#0b1220;color:#e5e7eb;border-color:#475569} thead th{background:#1e293b;color:#e5e7eb;border-color:#334155} tbody td{border-color:#1f2937} tbody tr:hover{background:#1e293b}.mobile-bottom-nav{background:rgba(17,24,39,.98);border-color:#334155}.mobile-install{background:#164e63;color:#ecfeff;border-color:#155e75}
 }
+
+
+/* ===== v5 overflow guard for Android ===== */
+@media(max-width:820px){
+  .cfg-box,.cfg-panel,.card,.tbl,.sc{max-width:100%;min-width:0;overflow-wrap:anywhere}
+  .cfg-peaks{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%}
+  .cfg-peaks label{min-width:0;width:100%;justify-content:flex-start;padding:10px 12px;font-size:13px;line-height:1.25}
+  #bgPeaksList{max-width:100%;overflow:hidden}
+  .cfg-msg,.cfg-stat,.status,.foot{word-break:break-word;overflow-wrap:anywhere}
+  main,section,div{min-width:0}
+}
+@media(max-width:390px){.cfg-peaks{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -782,7 +802,19 @@ function buildReportHTML(rep,smp,sumArg,peakArg){
   'td{padding:5px 8px;border-bottom:1px solid #f1f5f9}.r{text-align:right}'+
   '.note{font-size:12px;padding:8px 10px;border-left:3px solid '+noteCol+';background:'+noteBg+';margin-top:10px;border-radius:0 4px 4px 0}'+
   '.foot{margin-top:24px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:11px;color:#475569;line-height:1.5}'+
-  '@media print{body{background:#fff}.page{box-shadow:none;margin:0;max-width:none;padding:0}}</style></head><body><div class="page">'+
+  '@media print{body{background:#fff}.page{box-shadow:none;margin:0;max-width:none;padding:0}}
+/* ===== v5 overflow guard for Android ===== */
+@media(max-width:820px){
+  .cfg-box,.cfg-panel,.card,.tbl,.sc{max-width:100%;min-width:0;overflow-wrap:anywhere}
+  .cfg-peaks{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:100%}
+  .cfg-peaks label{min-width:0;width:100%;justify-content:flex-start;padding:10px 12px;font-size:13px;line-height:1.25}
+  #bgPeaksList{max-width:100%;overflow:hidden}
+  .cfg-msg,.cfg-stat,.status,.foot{word-break:break-word;overflow-wrap:anywhere}
+  main,section,div{min-width:0}
+}
+@media(max-width:390px){.cfg-peaks{grid-template-columns:1fr}}
+
+</style></head><body><div class="page">'+
   '<h1>Báo cáo định lượng NORM — phương pháp so sánh</h1>'+
   '<p class="sub">Viện Khoa học và Kỹ thuật Hạt nhân · đầu dò CeBr₃ 1.5″ (SN 01221005, HV 710 V) · bGamma</p><div class="bar"></div>'+
   '<div class="meta"><div><span>Khách hàng</span>'+esc(r.customer||"—")+'</div><div><span>Ngày đo</span>'+esc(r.date||"—")+'</div>'+
