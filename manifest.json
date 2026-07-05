@@ -1,13 +1,13 @@
 {
-  "name": "NORM CeBr3 Mobile",
+  "name": "NORM CeBr3",
   "short_name": "NORM CeBr3",
-  "description": "Công cụ tính hoạt độ NORM bằng phương pháp so sánh cho đầu dò CeBr3.",
+  "description": "Tính hoạt độ NORM bằng phương pháp so sánh trực tiếp với chuẩn IAEA trên hệ CeBr3.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#f1f5f9",
   "theme_color": "#0e7490",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "./icon-192.png",

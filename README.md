@@ -1,20 +1,10 @@
-# NORM CeBr3 Mobile Stable v6
+# NORM CeBr3 Mobile Stable v7
 
-Bản này được tạo lại từ file `NORM_cong_cu.html` gốc, giữ nguyên JavaScript/thuật toán và chỉ bổ sung lớp giao diện mobile + PWA.
+Bản cập nhật sửa lỗi JavaScript hiện ra ngoài giao diện và chống tràn ngang trên Android.
 
-## Upload lên GitHub Pages
+Triển khai trên GitHub Pages:
+1. Upload đè toàn bộ file trong gói này lên repository `CeBr3`.
+2. Vào Settings → Pages → Deploy from branch → main → /(root).
+3. Mở: https://ngdtuan.github.io/CeBr3/
 
-1. Xóa/ghi đè các file cũ trong repository `CeBr3`.
-2. Upload toàn bộ file trong gói này lên thư mục gốc repository.
-3. Bật Settings → Pages → Deploy from branch → main / root.
-4. Mở: https://ngdtuan.github.io/CeBr3/
-
-Nếu vẫn thấy bản cũ trên Android: Chrome → Site settings → Data stored → xóa dữ liệu của `ngdtuan.github.io`, sau đó mở lại.
-
-## Nội dung
-
-- `index.html`
-- `manifest.json`
-- `sw.js`
-- `icon-192.png`
-- `icon-512.png`
+Sau khi upload, trên điện thoại nên xóa cache hoặc mở tab ẩn danh để tránh service worker cũ.
