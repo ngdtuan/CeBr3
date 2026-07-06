@@ -1,14 +1,6 @@
-# NORM CeBr3 Mobile v10
+# NORM CeBr3 Mobile v12
 
-Phiên bản v10 tập trung vào chức năng thực đầu tiên:
-
-- Giữ nền Android-safe của v9.
-- Không dùng Project Manager.
-- Trang Cài đặt vẫn hiển thị trực tiếp bằng HTML.
-- Bổ sung kiểm tra/nạp report bGamma ở màn hình Nạp mẫu.
-- Sau khi nạp file, app hiển thị bảng xem trước: đỉnh mục tiêu, năng lượng đọc được, area cps, sigma cps.
-- Parser hỗ trợ HTML report bGamma và CSV/TXT đơn giản.
-
-Upload toàn bộ file lên GitHub Pages, sau đó mở:
-
-https://ngdtuan.github.io/CeBr3/index.html?v=10
+- Dung sai khớp E chỉ còn thiết lập tại màn hình Cấu hình.
+- Màn hình Nạp mẫu chỉ hiển thị dung sai đang áp dụng.
+- Khi thay đổi dung sai trong Cấu hình, parser tự phân tích lại report đã nạp.
+- Giá trị dung sai được lưu bằng localStorage và dùng lại khi mở app.
