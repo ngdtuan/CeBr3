@@ -1,3 +1,3 @@
-# NORM CeBr₃ Mobile v7
+# NORM CeBr3 Mobile v8
 
-Bản này có trang Cài đặt hoạt động thật và hiển thị nội dung trực tiếp. Upload toàn bộ file lên GitHub Pages.
+Sửa lỗi màn hình Cài đặt trắng do cấu trúc HTML.
