@@ -1,3 +1,3 @@
-# NORM CeBr3 Mobile v6
+# NORM CeBr3 Mobile v6.1
 
-Bản v6: bổ sung chức năng cho màn hình Cài đặt: Routine/Research, sáng/tối, màu nhấn, sao lưu/khôi phục JSON, đặt lại cấu hình, xoá lịch sử và xoá cache PWA.
+Bản này thêm nút mở Cài đặt ngay trong màn hình Cấu hình và giữ mục ☰ → Cài đặt.

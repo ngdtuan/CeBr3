@@ -109,7 +109,7 @@ body.theme-dark{--bg:#0b1220;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--line
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v6 UI · Cài đặt đã có chức năng: giao diện, chế độ, sao lưu, khôi phục, xoá lịch sử/cache.</div>
+  <div class="drawerFooter">v6.1 UI · Cài đặt đã có chức năng: giao diện, chế độ, sao lưu, khôi phục, xoá lịch sử/cache.</div>
 </aside>
 
 <div class="app">
@@ -132,6 +132,11 @@ body.theme-dark{--bg:#0b1220;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--line
 </section>
 
 <section class="screen" id="screen-config">
+  <div class="card">
+    <div class="h"><span class="bar" style="background:#7c3aed"></span>Cài đặt nhanh</div>
+    <p class="hint">Mục này mở trực tiếp trang Cài đặt ứng dụng. Có thể dùng để bật Routine/Research Mode, sáng/tối, màu nhấn, sao lưu/khôi phục và xóa cache.</p>
+    <button class="btn secondary" data-open-panel="settings">🔧 MỞ CÀI ĐẶT ỨNG DỤNG</button>
+  </div>
   <div class="card"><div class="h"><span class="bar"></span>Cấu hình phân tích</div>
     <div class="toggle"><input type="checkbox" id="subtractBg" checked><div><b>Trừ phông chọn lọc</b><div class="mini">Mặc định chỉ trừ phông ở các đỉnh nền tự nhiên rõ: K-40 1460,82 keV và Tl-208 2614,51 keV.</div></div></div>
     <div class="field"><label>Các đỉnh dùng để trừ phông</label><div class="chips" id="bgPeakList"></div></div>
@@ -236,7 +241,7 @@ body.theme-dark{--bg:#0b1220;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--line
   <div class="card"><div class="h"><span class="bar" style="background:#334155"></span>Thông tin</div>
     <div class="quality">
       <div class="qitem"><span>Ứng dụng</span><b>NORM CeBr₃ Mobile</b></div>
-      <div class="qitem"><span>Phiên bản UI</span><b>v6</b></div>
+      <div class="qitem"><span>Phiên bản UI</span><b>v6.1</b></div>
       <div class="qitem"><span>Chế độ hiện tại</span><b id="currentModeLabel">Routine</b></div>
     </div>
   </div>
@@ -265,7 +270,7 @@ function $(id){return document.getElementById(id)}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 function vn(x,d=2){return (x==null||!isFinite(x))?'—':Number(x).toLocaleString('vi-VN',{minimumFractionDigits:d,maximumFractionDigits:d})}
 function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function go(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('screen-'+name).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.goto===name));$('topTitle').textContent=titles[name];window.scrollTo({top:0,behavior:'smooth'});if(name==='result')renderResults();if(name==='report')renderHistory()}
+function go(name){const target=$('screen-'+name); if(!target){toast('Chưa có màn hình: '+name,'err'); return;} document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));target.classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.goto===name));$('topTitle').textContent=titles[name]||'CÀI ĐẶT';try{target.scrollTo({top:0,behavior:'smooth'});}catch(e){target.scrollTop=0;} if(name==='result')renderResults();if(name==='report')renderHistory()}
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.goto)));
 $('measureDate').value=new Date().toISOString().slice(0,10);
 function num(t){t=String(t??'').trim().replace(/\s/g,'');if(t.includes('.')&&t.includes(','))t=t.replace(/,/g,'');else if(t.includes(',')&&!t.includes('.'))t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?v:null}
