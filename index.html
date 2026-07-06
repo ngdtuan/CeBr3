@@ -120,7 +120,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v12 · Dung sai khớp E dùng chung từ Cấu hình.</div>
+  <div class="drawerFooter">v13 · Sửa parser: đọc cột Energy (keV), không đọc nhầm Channel.</div>
 </aside>
 
 <div class="app">
@@ -290,9 +290,46 @@ document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',(
 $('measureDate').value=new Date().toISOString().slice(0,10);
 function num(t){t=String(t??'').trim().replace(/\s/g,'');if(t.includes('.')&&t.includes(','))t=t.replace(/,/g,'');else if(t.includes(',')&&!t.includes('.'))t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?v:null}
 function parsePaste(text){const out=[];for(const line of text.split(/\r?\n/)){const c=line.trim().split(/[\t;]+|\s{2,}|\s+/).filter(Boolean);if(c.length<3)continue;const E=num(c[0]),area=num(c[1]),sig=num(c[2]);if(E!=null&&area!=null&&sig!=null)out.push({E,area,sig});}return out}
-function parseBGammaHTML(html){const doc=new DOMParser().parseFromString(html,'text/html');const tables=[...doc.querySelectorAll('table')];for(const tbl of tables){const trs=[...tbl.querySelectorAll('tr')];if(!trs.length)continue;const head=trs[0].innerText.toLowerCase();if(!(head.includes('fitted')||head.includes('area')||head.includes('kev')||head.includes('energy')))continue;const out=[];for(let i=1;i<trs.length;i++){const cells=[...trs[i].querySelectorAll('td,th')].map(c=>c.innerText.trim());let candidates=[];for(let j=0;j<cells.length-2;j++){const E=num(cells[j]),a=num(cells[j+1]),s=num(cells[j+2]);if(E!=null&&a!=null&&s!=null&&E>20&&E<3200&&a>=0&&s>=0)candidates.push({E,area:a,sig:s})}if(candidates.length)out.push(candidates[0]);else if(cells.length>=14){const E=num(cells[4]),a=num(cells[12]),s=num(cells[13]);if(E!=null&&a!=null&&s!=null)out.push({E,area:a,sig:s})}}
- if(out.length>=2)return out}
-return null}
+function parseBGammaHTML(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const tables=[...doc.querySelectorAll('table')];
+  for(const tbl of tables){
+    const trs=[...tbl.querySelectorAll('tr')];
+    if(!trs.length)continue;
+    let headerIndex=-1, headers=[];
+    for(let h=0;h<Math.min(5,trs.length);h++){
+      const hs=[...trs[h].querySelectorAll('td,th')].map(c=>c.innerText.trim());
+      const ht=hs.join(' ').toLowerCase();
+      if((ht.includes('peaklabel')||ht.includes('peak label')||ht.includes('nuclide')||ht.includes('energy')||ht.includes('kev')) && ht.includes('area')){headerIndex=h;headers=hs.map(x=>x.toLowerCase());break;}
+    }
+    if(headerIndex<0)continue;
+    let eIdx=headers.findIndex(h=>(h.includes('energy')||h.includes('kev')||h==='e')&&!h.includes('channel')&&!h.includes('chan'));
+    let areaIdx=headers.findIndex(h=>h.includes('fitted')&&h.includes('area'));
+    if(areaIdx<0)areaIdx=headers.findIndex(h=>h.includes('area')&&!h.includes('continuum')&&!h.includes('gross'));
+    let sigIdx=-1;
+    if(areaIdx>=0){
+      for(let j=areaIdx+1;j<Math.min(headers.length,areaIdx+4);j++){
+        const h=headers[j];
+        if(h.includes('std')||h.includes('dev')||h.includes('sigma')||h.includes('σ')||h.includes('uncert')){sigIdx=j;break;}
+      }
+      if(sigIdx<0) sigIdx=areaIdx+1;
+    }
+    // bGamma report thường có Channel ở các cột đầu; không dùng quét 3 số liên tiếp vì dễ lấy nhầm Channel làm năng lượng.
+    // Với report bGamma hiện tại: E(keV)=cột 4, Fitted area=cột 12, Sigma=cột 13.
+    if(eIdx<0)eIdx=4;
+    if(areaIdx<0)areaIdx=12;
+    if(sigIdx<0)sigIdx=13;
+    const out=[];
+    for(let i=headerIndex+1;i<trs.length;i++){
+      const cells=[...trs[i].querySelectorAll('td,th')].map(c=>c.innerText.trim());
+      if(cells.length<=Math.max(eIdx,areaIdx,sigIdx))continue;
+      const E=num(cells[eIdx]),a=num(cells[areaIdx]),sg=num(cells[sigIdx]);
+      if(E!=null&&a!=null&&sg!=null&&E>20&&E<3200&&a>=0&&sg>=0)out.push({E,area:a,sig:sg});
+    }
+    if(out.length)return out;
+  }
+  return null;
+}
 function nearestPeak(rows,E){let best=null,bd=1e99;for(const r of rows||[]){const d=Math.abs(Number(r.E)-E);if(d<bd){bd=d;best=r}}return best?{...best,delta:bd}:null}
 function lookup(rows,E,tol){const n=nearestPeak(rows,E);return (n&&n.delta<=tol)?n:null}
 function getTol(){const b=$('tolE');let v=Number((b&&b.value)||state.cfg.tol||localStorage.getItem('norm_tolE')||3);if(!isFinite(v)||v<=0)v=3;state.cfg.tol=v;if(b&&Number(b.value)!==v)b.value=v;localStorage.setItem('norm_tolE',String(v));renderTolInfo();return v}
@@ -411,7 +448,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
 </script>
 
 <script>
-// v12 Parser: dung sai khớp E lấy duy nhất từ Cấu hình, lưu localStorage và tự phân tích lại report đã nạp.
+// v13 Parser: đọc đúng cột Energy (keV), không quét nhầm cột Channel; dung sai khớp E lấy từ Cấu hình.
 (function(){
   const $=(id)=>document.getElementById(id);
   const LS='norm_cebr3_mobile_v9_settings';
@@ -433,7 +470,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
     if($('routineCard')) $('routineCard').onclick=()=>{st.mode='routine';save(st);apply(st);toast('Routine Mode')};
     if($('researchCard')) $('researchCard').onclick=()=>{st.mode='research';save(st);apply(st);toast('Research Mode')};
     if($('btnApplyTheme')) $('btnApplyTheme').onclick=()=>{st.theme=$('themeSelect').value;st.accent=$('accentSelect').value;save(st);apply(st);toast('Đã áp dụng giao diện')};
-    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v12-shared-tolerance',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
+    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v13-energy-column-parser',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
     if($('btnImportSettings')) $('btnImportSettings').onclick=()=>$('importSettingsFile').click();
     if($('importSettingsFile')) $('importSettingsFile').onchange=e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{try{const j=JSON.parse(String(rd.result||'{}')); st=Object.assign({},defaults,j.settings||j);save(st);apply(st);toast('Đã khôi phục')}catch(err){toast('File JSON không hợp lệ')}}; rd.readAsText(f);};
     if($('btnClearCache')) $('btnClearCache').onclick=async()=>{try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs)await r.unregister()} if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k)} toast('Đã xóa cache, tải lại trang')}catch(e){toast('Không xóa được cache')}};
