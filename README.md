@@ -1,6 +1,3 @@
-# NORM CeBr3 Mobile v12
+# NORM CeBr3 Mobile v14
 
-- Dung sai khớp E chỉ còn thiết lập tại màn hình Cấu hình.
-- Màn hình Nạp mẫu chỉ hiển thị dung sai đang áp dụng.
-- Khi thay đổi dung sai trong Cấu hình, parser tự phân tích lại report đã nạp.
-- Giá trị dung sai được lưu bằng localStorage và dùng lại khi mở app.
+Sửa parser theo đúng mã gốc NORM_cong_cu.html: lấy E từ cells[4], fitted area từ cells[12], sigma từ cells[13].
