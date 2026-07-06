@@ -91,6 +91,9 @@ body.theme-dark{--bg:#0b1220;--card:#111827;--ink:#e5e7eb;--muted:#94a3b8;--line
 .settingsPanel{display:grid;gap:14px}.settingTile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}.settingTitle{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px;margin-bottom:6px}.settingDesc{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 12px}.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.seg button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:12px;font-weight:800}.seg button.on{background:#ecfeff;border-color:#67e8f9;color:var(--teal)}.settingsGrid{display:grid;gap:10px}.settingsGrid.two{grid-template-columns:1fr 1fr}.settingsRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px}.settingsRow b{font-size:13.5px}.settingsRow small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}.switch{appearance:none;width:52px;height:30px;border-radius:999px;background:#cbd5e1;position:relative;outline:none;transition:.18s}.switch:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:white;border-radius:50%;transition:.18s;box-shadow:0 2px 6px rgba(0,0,0,.2)}.switch:checked{background:var(--teal)}.switch:checked:before{transform:translateX(22px)}.v7Badge{display:inline-flex;align-items:center;border-radius:999px;background:#ecfeff;color:#0e7490;border:1px solid #67e8f9;font-size:11px;font-weight:800;padding:4px 8px;margin-left:8px}.dangerZone{border-color:#fecdd3;background:#fff1f2}.dangerZone .settingTitle{color:#be123c}@media(max-width:420px){.settingsGrid.two,.seg{grid-template-columns:1fr}}
 body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg button{background:#111827;border-color:#263244;color:#e5e7eb}body.theme-dark .seg button.on{background:#083344;border-color:#0891b2;color:#67e8f9}body.theme-dark .dangerZone{background:#2a1118;border-color:#7f1d1d}
 
+
+.parserSummary{display:grid;gap:10px;margin-top:12px}.parseCard{border:1px solid #dbe5ef;background:#fff;border-radius:14px;padding:12px}.parseCard b{display:block;color:#0f766e;margin-bottom:6px}.parseMini{font-size:12px;color:#64748b;line-height:1.45}.parseTable{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}.parseTable th{background:#f1f5f9;color:#334155;text-align:left;padding:7px;border-bottom:1px solid #e2e8f0}.parseTable td{padding:7px;border-bottom:1px solid #f1f5f9}.parseOK{color:#059669;font-weight:800}.parseMissing{color:#e11d48;font-weight:800}.parseWarn{color:#b45309;font-weight:800}.btn.small{padding:10px 12px;font-size:13px;border-radius:12px;margin-top:8px}
+body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-dark .parseTable th{background:#0f172a;color:#e5e7eb;border-color:#263244}body.theme-dark .parseTable td{border-color:#263244}
 </style>
 </head>
 <body>
@@ -114,7 +117,7 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v9 · Android-safe · Cài đặt tĩnh, không dựng lại bằng JS.</div>
+  <div class="drawerFooter">v10 · Parser report bGamma · không dùng Project.</div>
 </aside>
 
 <div class="app">
@@ -132,6 +135,8 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
     <input id="fileInput" type="file" accept=".html,.htm,.csv,.txt" class="hidden">
     <div class="filebox" id="dropZone"><strong>☁️ Chạm để chọn file</strong><small>hoặc kéo-thả report vào đây</small></div>
     <div id="loadedFiles"></div>
+    <button class="btn secondary small" id="btnCheckParsed" type="button">🔎 KIỂM TRA REPORT ĐÃ NẠP</button>
+    <div id="parsePreview" class="parserSummary"></div>
     <button class="btn" data-goto="config">TIẾP TỤC →</button>
   </div>
 </section>
@@ -210,7 +215,7 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
   <div class="card"><div class="h"><span class="bar"></span>Thư viện tài liệu</div><p class="hint">Khu vực tích hợp SOP, chứng chỉ IAEA và tài liệu CeBr₃. Bản sau sẽ gắn file PDF/DOCX để mở trực tiếp trong app.</p><div class="toolGrid"><div class="toolCard"><b>RGU-1</b><small>Chứng chỉ chuẩn uranium</small></div><div class="toolCard"><b>RGTh-1</b><small>Chứng chỉ chuẩn thorium</small></div><div class="toolCard"><b>RGK-1</b><small>Chứng chỉ chuẩn kali</small></div><div class="toolCard"><b>SOP NORM</b><small>Quy trình đo và tính hoạt độ</small></div></div></div>
 </section>
 <section class="screen" id="screen-settings">
-  <div class="card" style="border-color:#67e8f9;background:#ecfeff"><div class="h"><span class="bar"></span>Cài đặt ứng dụng <span class="v7Badge">v9 Android-safe</span></div><p class="hint"><b>Bản kiểm tra Android:</b> nội dung Cài đặt được đặt trực tiếp trong HTML, không phụ thuộc JavaScript.</p></div>
+  <div class="card" style="border-color:#67e8f9;background:#ecfeff"><div class="h"><span class="bar"></span>Cài đặt ứng dụng <span class="v7Badge">v10 Parser</span></div><p class="hint"><b>Bản v10:</b> đã bổ sung kiểm tra/nạp report bGamma thực tế và bảng xem trước các đỉnh mục tiêu.</p></div>
   <div class="card"><div class="h"><span class="bar"></span>Cài đặt ứng dụng</div>
     <p class="hint">Các mục trong màn hình này đã có chức năng. Cài đặt được lưu trên thiết bị bằng localStorage.</p>
     <div class="modeBox">
@@ -290,9 +295,23 @@ function compute(){readInputs();const per=[];for(const p of PEAKS){const std=sta
 const summary=[];for(const nuc of ['Ra-226','Ra-228','Th-228','K-40']){const rs=per.filter(r=>r.ok&&r.to===nuc);if(!rs.length)continue;const W=rs.map(r=>1/(r.uC*r.uC));const sw=W.reduce((a,b)=>a+b,0);const mean=rs.reduce((a,r,i)=>a+W[i]*r.Cmau,0)/sw;const uc=1/Math.sqrt(sw);const chi2=rs.length>1?rs.reduce((a,r,i)=>a+W[i]*Math.pow(r.Cmau-mean,2),0)/(rs.length-1):null;summary.push({nuc,n:rs.length,mean,uc,urel:uc/mean,chi2})}state.last={per,summary};return state.last}
 function renderBgPeaks(){const wrap=$('bgPeakList');wrap.innerHTML=PEAKS.map(p=>`<label class="chip ${state.cfg.bgPeaks.includes(p.E)?'on':''}"><input type="checkbox" data-e="${p.E}" ${state.cfg.bgPeaks.includes(p.E)?'checked':''}>${p.nuc} (${p.E})</label>`).join('');wrap.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',()=>{const e=Number(cb.dataset.e);if(cb.checked&&!state.cfg.bgPeaks.includes(e))state.cfg.bgPeaks.push(e);if(!cb.checked)state.cfg.bgPeaks=state.cfg.bgPeaks.filter(x=>x!==e);renderBgPeaks()}))}
 renderBgPeaks();
-function renderLoaded(){const names={RGU:'Chuẩn RGU-1',RGTh:'Chuẩn RGTh-1',RGK:'Chuẩn RGK-1',MAU:'Mẫu đo',PHONG:'Phông'};$('loadedFiles').innerHTML=Object.keys(state.blocks).filter(k=>state.blocks[k].length).map(k=>`<div class="filebox loaded"><div class="filebar"><div class="fileicon">📄</div><div><strong>${names[k]}</strong><small>${state.loaded[k]||''} · ${state.blocks[k].length} dòng</small></div><button class="x" data-del="${k}">×</button></div></div>`).join('');document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{state.blocks[b.dataset.del]=[];delete state.loaded[b.dataset.del];renderLoaded();})}
+function renderLoaded(){const names={RGU:'Chuẩn RGU-1',RGTh:'Chuẩn RGTh-1',RGK:'Chuẩn RGK-1',MAU:'Mẫu đo',PHONG:'Phông'};$('loadedFiles').innerHTML=Object.keys(state.blocks).filter(k=>state.blocks[k].length).map(k=>`<div class="filebox loaded"><div class="filebar"><div class="fileicon">📄</div><div><strong>${names[k]}</strong><small>${state.loaded[k]||''} · ${state.blocks[k].length} dòng</small></div><button class="x" data-del="${k}">×</button></div></div>`).join('');document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{state.blocks[b.dataset.del]=[];delete state.loaded[b.dataset.del];renderLoaded();renderParsePreview();})}
+function renderParsePreview(){
+  const box=$('parsePreview'); if(!box) return;
+  const keys=Object.keys(state.blocks).filter(k=>state.blocks[k]&&state.blocks[k].length);
+  if(!keys.length){box.innerHTML='<div class="parseCard"><b>Chưa có report</b><div class="parseMini">Chọn từng file report bGamma cho Mẫu đo, Phông, RGU-1, RGTh-1, RGK-1. Sau khi nạp, bảng này sẽ kiểm tra các đỉnh mục tiêu.</div></div>';return}
+  const names={RGU:'Chuẩn RGU-1',RGTh:'Chuẩn RGTh-1',RGK:'Chuẩn RGK-1',MAU:'Mẫu đo',PHONG:'Phông'};
+  box.innerHTML=keys.map(k=>{
+    const rows=state.blocks[k]||[];
+    const peaks=(k==='RGU'?PEAKS.filter(p=>p.std==='RGU'):k==='RGTh'?PEAKS.filter(p=>p.std==='RGTh'):k==='RGK'?PEAKS.filter(p=>p.std==='RGK'):PEAKS);
+    const body=peaks.map(p=>{const r=lookup(rows,p.E,state.cfg.tol||3);return `<tr><td>${p.E}</td><td>${p.nuc}</td><td>${r?'<span class="parseOK">Có</span>':'<span class="parseMissing">Thiếu</span>'}</td><td>${r?vn(r.E,2):'—'}</td><td>${r?vn(r.area,5):'—'}</td><td>${r?vn(r.sig,5):'—'}</td></tr>`}).join('');
+    const ok=peaks.filter(p=>lookup(rows,p.E,state.cfg.tol||3)).length;
+    return `<div class="parseCard"><b>${names[k]||k}</b><div class="parseMini">File: ${esc(state.loaded[k]||'')} · đọc được ${rows.length} dòng · khớp ${ok}/${peaks.length} đỉnh mục tiêu với dung sai ±${state.cfg.tol||3} keV.</div><table class="parseTable"><thead><tr><th>E chuẩn</th><th>Đỉnh</th><th>Trạng thái</th><th>E đọc</th><th>Area cps</th><th>σ cps</th></tr></thead><tbody>${body}</tbody></table></div>`
+  }).join('');
+}
+
 $('dropZone').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{if(e.target.files[0])loadFile(e.target.files[0]);e.target.value=''};['dragover','drop'].forEach(ev=>$('dropZone').addEventListener(ev,e=>{e.preventDefault();if(ev==='drop'&&e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])}));
-function loadFile(file){const k=$('targetBlock').value;const rd=new FileReader();rd.onload=()=>{const txt=String(rd.result||'');let rows=file.name.match(/\.html?$/i)?parseBGammaHTML(txt):parsePaste(txt);if(!rows||!rows.length)rows=parsePaste(txt);if(!rows||!rows.length){toast('Không đọc được file: '+file.name);return}state.blocks[k]=rows;state.loaded[k]=file.name;renderLoaded();toast('Đã nạp '+file.name+' vào '+k)};rd.readAsText(file)}
+function loadFile(file){const k=$('targetBlock').value;const rd=new FileReader();rd.onload=()=>{const txt=String(rd.result||'');let rows=file.name.match(/\.html?$/i)?parseBGammaHTML(txt):parsePaste(txt);if(!rows||!rows.length)rows=parsePaste(txt);if(!rows||!rows.length){toast('Không đọc được file: '+file.name);return}state.blocks[k]=rows;state.loaded[k]=file.name;renderLoaded();renderParsePreview();toast('Đã nạp '+file.name+' vào '+k+' · '+rows.length+' dòng')};rd.readAsText(file)}
 $('btnApplyConfig').onclick=()=>{readInputs();toast('Đã lưu cấu hình')};
 $('btnRunCalc').onclick=()=>{readInputs();const log=$('calcLog');log.innerHTML='';const steps=['Kiểm tra file phổ','Trích xuất các ROI','Trừ nền/phông theo cấu hình','Tính hệ số CF từ mẫu chuẩn','Tính hoạt độ các nuclide','Tổng hợp kết quả'];let i=0;$('prog').style.width='0%';$('calcStatus').textContent='Đang tính hoạt độ...';const timer=setInterval(()=>{if(i<steps.length){log.innerHTML+=`<li><span>${steps[i]}</span><span class="ok">✓</span></li>`;$('prog').style.width=Math.round((i+1)/steps.length*100)+'%';i++;}else{clearInterval(timer);compute();$('calcStatus').textContent='Hoàn tất tính toán.';document.getElementById('st3').classList.remove('active');document.getElementById('st3').classList.add('done');document.getElementById('st4').classList.add('done');toast('Tính xong');setTimeout(()=>go('result'),500)}},220)};
 function renderResults(){const {per,summary}=compute();$('sampleInfo').innerHTML=`<b>${esc(state.sample.name)}</b> · ${esc(state.sample.matrix)} · m = ${vn(state.sample.m,4)} kg · t = ${vn(state.sample.t,0)} s`;$('resultCards').innerHTML=['Ra-226','Ra-228','Th-228','K-40'].map(n=>{const s=summary.find(x=>x.nuc===n),c=COLORS[n];return `<div class="rescard" style="background:${c}"><div class="nu">${n}</div>${s?`<div class="val">${vn(s.mean,1)}</div><div class="u">± ${vn(s.uc,1)} Bq/kg · ${vn(s.urel*100,1)}%</div><div class="u">${s.n} đỉnh${s.chi2!=null?' · χ²ᵣ '+vn(s.chi2,2):''}</div>`:'<div class="u">Thiếu dữ liệu</div>'}</div>`}).join('');$('peakTable').innerHTML='<thead><tr><th>E (keV)</th><th>Đồng vị</th><th>CF</th><th>A tổng</th><th>C mẫu</th><th>u %</th><th>MDA</th><th>Phông</th></tr></thead><tbody>'+per.map(r=>`<tr><td>${r.E}</td><td>${r.nuc} → ${r.to}</td>${r.ok?`<td>${vn(r.CF,4)}</td><td>${vn(r.Atot,2)}</td><td><b>${vn(r.Cmau,2)}</b></td><td>${vn(r.urel*100,1)}</td><td>${vn(r.MDA,2)}</td><td>${r.doBg?(r.bgAdequate?'✓':'⚠'):'—'}</td>`:`<td colspan="6">${r.reason}</td>`}</tr>`).join('')+'</tbody>';const warn=per.filter(r=>r.ok&&r.doBg&&!r.bgAdequate).length;$('qualityBox').innerHTML=`<div class="qitem"><span>Đỉnh phân tích hợp lệ</span><b>${per.filter(r=>r.ok).length}/${PEAKS.length}</b></div><div class="qitem"><span>Độ phù hợp phông</span><b>${warn?'Cần xem lại':'Đạt'}</b></div><div class="qitem"><span>Trạng thái</span><b>${summary.length?'Có kết quả':'Thiếu dữ liệu'}</b></div>`;renderHistory()}
@@ -315,6 +334,7 @@ function saveFile(name,text,type){const blob=new Blob(['\ufeff'+text],{type});co
 $('btnExportHtml').onclick=()=>saveFile('Bao_cao_NORM_'+Date.now()+'.html',makeReport(),'text/html;charset=utf-8');
 $('btnExportTxt').onclick=()=>{if(!state.last)compute();const lines=['Nuclide\tActivity_Bq_kg\tu_Bq_kg\tu_percent',...state.last.summary.map(x=>`${x.nuc}\t${x.mean}\t${x.uc}\t${x.urel*100}`)];saveFile('Ket_qua_NORM_'+Date.now()+'.txt',lines.join('\n'),'text/plain;charset=utf-8')};
 
+if($('btnCheckParsed')) $('btnCheckParsed').onclick=()=>{readInputs();renderParsePreview();toast('Đã kiểm tra các report đã nạp')};
 $('btnHelp').onclick=()=>toast('Quy trình: Nạp report → Cấu hình → Tính toán → Kết quả → Xuất báo cáo');
 const drawer=$('drawer'), drawerOverlay=$('drawerOverlay');
 function openDrawer(){drawer.classList.add('show');drawerOverlay.classList.add('show')}
@@ -341,7 +361,7 @@ function applyTheme(){
 }
 function bindSettings(){
   if($('btnApplyTheme')) $('btnApplyTheme').onclick=()=>{localStorage.setItem('norm_mobile_theme',$('themeSelect').value);localStorage.setItem('norm_mobile_accent',$('accentSelect').value);applyTheme();toast('Đã áp dụng giao diện')};
-  if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{readInputs();const backup={version:'v6',time:new Date().toISOString(),mode:state.mode,theme:localStorage.getItem('norm_mobile_theme')||'system',accent:localStorage.getItem('norm_mobile_accent')||'teal',std:state.std,cfg:state.cfg,sample:state.sample,loaded:state.loaded,history:state.history};saveFile('NORM_CeBr3_backup_'+Date.now()+'.json',JSON.stringify(backup,null,2),'application/json;charset=utf-8');toast('Đã xuất file sao lưu')};
+  if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{readInputs();const backup={version:'v10',time:new Date().toISOString(),mode:state.mode,theme:localStorage.getItem('norm_mobile_theme')||'system',accent:localStorage.getItem('norm_mobile_accent')||'teal',std:state.std,cfg:state.cfg,sample:state.sample,loaded:state.loaded,history:state.history};saveFile('NORM_CeBr3_backup_'+Date.now()+'.json',JSON.stringify(backup,null,2),'application/json;charset=utf-8');toast('Đã xuất file sao lưu')};
   if($('btnImportSettings')) $('btnImportSettings').onclick=()=>$('importSettingsFile').click();
   if($('importSettingsFile')) $('importSettingsFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const b=JSON.parse(String(rd.result||'{}')); if(b.std) state.std=b.std; if(b.cfg) state.cfg=b.cfg; if(b.sample) state.sample=b.sample; if(b.loaded) state.loaded=b.loaded; if(Array.isArray(b.history)){state.history=b.history;localStorage.setItem('norm_mobile_history',JSON.stringify(state.history))} if(b.mode) setMode(b.mode); if(b.theme) localStorage.setItem('norm_mobile_theme',b.theme); if(b.accent) localStorage.setItem('norm_mobile_accent',b.accent); hydrateInputs(); renderBgPeaks(); renderLoaded(); renderHistory(); applyTheme(); toast('Đã khôi phục cấu hình')}catch(err){toast('File JSON không hợp lệ')}};rd.readAsText(f);e.target.value=''};
   if($('btnResetConfig')) $('btnResetConfig').onclick=()=>{if(!confirm('Đặt lại cấu hình chuẩn, phông và thông tin mẫu về mặc định?'))return;state.std=JSON.parse(JSON.stringify(APP_DEFAULTS.std));state.cfg=JSON.parse(JSON.stringify(APP_DEFAULTS.cfg));state.sample=JSON.parse(JSON.stringify(APP_DEFAULTS.sample));hydrateInputs();renderBgPeaks();toast('Đã đặt lại cấu hình')};
@@ -367,11 +387,11 @@ window.addEventListener('orientationchange', ()=>setTimeout(applyScrollFix,250))
 document.addEventListener('DOMContentLoaded', applyScrollFix);
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
-renderLoaded();renderHistory();
+renderLoaded();renderParsePreview();renderHistory();
 </script>
 
 <script>
-// v9 Android-safe: không dựng lại trang Cài đặt bằng innerHTML; chỉ gắn chức năng lên HTML tĩnh.
+// v10 Parser: không dựng lại trang Cài đặt bằng innerHTML; chỉ gắn chức năng lên HTML tĩnh.
 (function(){
   const $=(id)=>document.getElementById(id);
   const LS='norm_cebr3_mobile_v9_settings';
