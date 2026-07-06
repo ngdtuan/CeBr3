@@ -120,7 +120,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v16 · Parser gốc NORM_cong_cu.html: HTML bGamma đọc đúng cells[4]/[12]/[13], không fallback quét số HTML.</div>
+  <div class="drawerFooter">v17 · Parser gốc NORM_cong_cu.html: HTML bGamma đọc đúng cells[4]/[12]/[13], không fallback quét số HTML.</div>
 </aside>
 
 <div class="app">
@@ -154,7 +154,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
   <div class="card"><div class="h"><span class="bar"></span>Cấu hình phân tích</div>
     <div class="toggle"><input type="checkbox" id="subtractBg" checked><div><b>Trừ phông chọn lọc</b><div class="mini">Mặc định chỉ trừ phông ở các đỉnh nền tự nhiên rõ: K-40 1460,82 keV và Tl-208 2614,51 keV.</div></div></div>
     <div class="field"><label>Các đỉnh dùng để trừ phông</label><div class="chips" id="bgPeakList"></div></div>
-    <div class="grid2"><div class="field"><label>Dung sai khớp E (keV)</label><input id="tolE" type="number" min="0.1" max="100" step="0.1" value="3"><div class="mini">Dùng cho parser khi khớp centroid report bGamma với E chuẩn. Giá trị được lưu và áp dụng lại cho report đã nạp.</div></div><div class="field"><label>Phương pháp</label><select><option>So sánh trực tiếp CF</option></select></div></div>
+    <div class="grid2"><div class="field"><label>Dung sai khớp E (keV)</label><input id="tolE" type="text" inputmode="decimal" value="3"><div class="mini">Dùng cho parser khi khớp centroid report bGamma với E chuẩn. Giá trị được lưu và áp dụng lại cho report đã nạp.</div></div><div class="field"><label>Phương pháp</label><select><option>So sánh trực tiếp CF</option></select></div></div>
   </div>
   <div class="card"><div class="h"><span class="bar" style="background:#b45309"></span>Tham số chuẩn IAEA</div>
     <p class="hint">Giá trị mặc định theo chứng chỉ: RGU-1 cho ²³⁸U, RGTh-1 cho ²³²Th, RGK-1 cho ⁴⁰K. Nhập khối lượng đúng với hộp chuẩn thực tế.</p>
@@ -255,7 +255,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
   <div class="card"><div class="h"><span class="bar" style="background:#334155"></span>Thông tin</div>
     <div class="quality">
       <div class="qitem"><span>Ứng dụng</span><b>NORM CeBr₃ Mobile</b></div>
-      <div class="qitem"><span>Phiên bản UI</span><b>v16-original-parser</b></div>
+      <div class="qitem"><span>Phiên bản UI</span><b>v17-original-parser</b></div>
       <div class="qitem"><span>Chế độ hiện tại</span><b id="currentModeLabel">Routine</b></div>
     </div>
   </div>
@@ -291,7 +291,7 @@ $('measureDate').value=new Date().toISOString().slice(0,10);
 function num(t){t=String(t??'').trim().replace(/\s/g,'');if(t.includes('.')&&t.includes(','))t=t.replace(/,/g,'');else if(t.includes(',')&&!t.includes('.'))t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?v:null}
 function parsePaste(text){const out=[];for(const line of text.split(/\r?\n/)){const c=line.trim().split(/[\t;]+|\s{2,}|\s+/).filter(Boolean);if(c.length<3)continue;const E=num(c[0]),area=num(c[1]),sig=num(c[2]);if(E!=null&&area!=null&&sig!=null)out.push({E,area,sig});}return out}
 function parseBGammaHTML(html){
-  /* v16: lấy nguyên logic parser từ NORM_cong_cu.html gốc. */
+  /* v17: lấy nguyên logic parser từ NORM_cong_cu.html gốc. */
   const doc=new DOMParser().parseFromString(html,"text/html");
   const tables=doc.querySelectorAll("table");
   for(const tbl of tables){
@@ -311,14 +311,28 @@ function parseBGammaHTML(html){
 }
 function nearestPeak(rows,E){let best=null,bd=1e99;for(const r of rows||[]){const d=Math.abs(Number(r.E)-E);if(d<bd){bd=d;best=r}}return best?{...best,delta:bd}:null}
 function lookup(rows,E,tol){const n=nearestPeak(rows,E);return (n&&n.delta<=tol)?n:null}
-function getTol(){const b=$('tolE');let v=Number((b&&b.value)||state.cfg.tol||localStorage.getItem('norm_tolE')||3);if(!isFinite(v)||v<=0)v=3;state.cfg.tol=v;if(b&&Number(b.value)!==v)b.value=v;localStorage.setItem('norm_tolE',String(v));renderTolInfo();return v}
+function getTol(){const b=$('tolE');let raw=(b&&b.value!==undefined)?String(b.value).trim().replace(',', '.'):' ';let v=Number(raw||state.cfg.tol||localStorage.getItem('norm_tolE')||3);if(!isFinite(v)||v<=0)v=3;state.cfg.tol=v;if(b&&String(b.value).trim()!==String(v))b.value=v;localStorage.setItem('norm_tolE',String(v));renderTolInfo();return v}
 function renderTolInfo(){const el=$('tolInfo');const v=Number(state.cfg.tol||localStorage.getItem('norm_tolE')||3);if(el)el.textContent='±'+(Number.isFinite(v)?v:3)+' keV'}
 function readInputs(){state.sample.name=$('sampleName').value||'Mẫu';state.sample.matrix=$('matrix').value;state.sample.m=Number($('sampleMass').value)||0;state.sample.t=Number($('liveTime').value)||0;state.sample.date=$('measureDate').value;state.sample.operator=$('operator').value;state.cfg.subtractBg=$('subtractBg').checked;state.cfg.tol=getTol();state.std.RGU.C=Number($('C_RGU').value)||4950;state.std.RGU.m=Number($('M_RGU').value)||0;state.std.RGTh.C=Number($('C_RGTh').value)||3250;state.std.RGTh.m=Number($('M_RGTh').value)||0;state.std.RGK.C=Number($('C_RGK').value)||14180;state.std.RGK.m=Number($('M_RGK').value)||0}
 function compute(){readInputs();const per=[];for(const p of PEAKS){const std=state.std[p.std];const ch=lookup(state.blocks[p.std],p.E,state.cfg.tol);const mu=lookup(state.blocks.MAU,p.E,state.cfg.tol);const doBg=state.cfg.subtractBg&&state.cfg.bgPeaks.map(Number).includes(p.E);const bg=doBg?lookup(state.blocks.PHONG,p.E,state.cfg.tol):null;if(!ch||!mu){per.push({...p,ok:false,reason:'Thiếu dữ liệu'});continue}const bgA=bg?bg.area:0,bgS=bg?bg.sig:0;const Rch=ch.area-bgA,Rm=mu.area-bgA;if(Rch<=0||Rm<=0||!std.m||!std.C||!state.sample.m){per.push({...p,ok:false,reason:'Dữ liệu không hợp lệ'});continue}const uRch=Math.hypot(ch.sig||0,bgS),uRm=Math.hypot(mu.sig||0,bgS);const CF=Rch/(std.C*std.m);const Atot=Rm/CF;const Cmau=Atot/state.sample.m;const urel=Math.hypot(uRm/Rm,uRch/Rch,(std.uC||0)/std.C);const uC=Cmau*urel;const B=(CONTINUUM[p.E]||0)*(state.sample.t||1);const MDA=(2.71+4.65*Math.sqrt(B))/((state.sample.t||1)*CF*state.sample.m);const bgAdequate=!doBg||!bg||bgS<=(mu.sig||0)/3;per.push({...p,ok:true,CF,Atot,Cmau,uC,urel,MDA,doBg,bgAdequate,tFactor:bgS>0&&mu.sig?Math.pow(bgS/(mu.sig/3),2):0})}
 const summary=[];for(const nuc of ['Ra-226','Ra-228','Th-228','K-40']){const rs=per.filter(r=>r.ok&&r.to===nuc);if(!rs.length)continue;const W=rs.map(r=>1/(r.uC*r.uC));const sw=W.reduce((a,b)=>a+b,0);const mean=rs.reduce((a,r,i)=>a+W[i]*r.Cmau,0)/sw;const uc=1/Math.sqrt(sw);const chi2=rs.length>1?rs.reduce((a,r,i)=>a+W[i]*Math.pow(r.Cmau-mean,2),0)/(rs.length-1):null;summary.push({nuc,n:rs.length,mean,uc,urel:uc/mean,chi2})}state.last={per,summary};return state.last}
 function renderBgPeaks(){const wrap=$('bgPeakList');wrap.innerHTML=PEAKS.map(p=>`<label class="chip ${state.cfg.bgPeaks.includes(p.E)?'on':''}"><input type="checkbox" data-e="${p.E}" ${state.cfg.bgPeaks.includes(p.E)?'checked':''}>${p.nuc} (${p.E})</label>`).join('');wrap.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',()=>{const e=Number(cb.dataset.e);if(cb.checked&&!state.cfg.bgPeaks.includes(e))state.cfg.bgPeaks.push(e);if(!cb.checked)state.cfg.bgPeaks=state.cfg.bgPeaks.filter(x=>x!==e);renderBgPeaks()}))}
 renderBgPeaks();
-['tolE'].forEach(id=>{const el=$(id); if(el){el.addEventListener('input',()=>{state.cfg.tol=getTol();renderParsePreview();toast('Đã áp dụng dung sai khớp E: ±'+state.cfg.tol+' keV');});el.addEventListener('change',()=>{state.cfg.tol=getTol();renderParsePreview();});}});
+['tolE'].forEach(id=>{const el=$(id); if(el){
+  el.addEventListener('input',()=>{
+    // Cho phép người dùng xóa trắng ô để nhập lại trên bàn phím Android.
+    // Không gọi getTol() khi ô tạm thời rỗng vì getTol() sẽ phục hồi giá trị mặc định ngay lập tức.
+    const raw=(el.value||'').trim().replace(',', '.');
+    if(raw===''){ state.cfg.tol=null; renderTolInfo(); return; }
+    const v=Number(raw);
+    if(Number.isFinite(v)&&v>0){ state.cfg.tol=v; localStorage.setItem('norm_tolE',String(v)); renderTolInfo(); renderParsePreview(); }
+  });
+  el.addEventListener('change',()=>{
+    const raw=(el.value||'').trim().replace(',', '.');
+    if(raw===''){ el.value=localStorage.getItem('norm_tolE')||3; }
+    state.cfg.tol=getTol();renderParsePreview();toast('Đã áp dụng dung sai khớp E: ±'+state.cfg.tol+' keV');
+  });
+}});
 function renderLoaded(){const names={RGU:'Chuẩn RGU-1',RGTh:'Chuẩn RGTh-1',RGK:'Chuẩn RGK-1',MAU:'Mẫu đo',PHONG:'Phông'};$('loadedFiles').innerHTML=Object.keys(state.blocks).filter(k=>state.blocks[k].length).map(k=>`<div class="filebox loaded"><div class="filebar"><div class="fileicon">📄</div><div><strong>${names[k]}</strong><small>${state.loaded[k]||''} · ${state.blocks[k].length} dòng</small></div><button class="x" data-del="${k}">×</button></div></div>`).join('');document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{state.blocks[b.dataset.del]=[];delete state.loaded[b.dataset.del];renderLoaded();renderParsePreview();})}
 function renderParsePreview(){
   const box=$('parsePreview'); if(!box) return;
@@ -427,7 +441,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
 </script>
 
 <script>
-// v16 Parser: trích logic parseBGammaHTML từ NORM_cong_cu.html gốc; HTML report không fallback quét số tự do.
+// v17 Parser: trích logic parseBGammaHTML từ NORM_cong_cu.html gốc; HTML report không fallback quét số tự do.
 (function(){
   const $=(id)=>document.getElementById(id);
   const LS='norm_cebr3_mobile_v9_settings';
@@ -449,7 +463,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
     if($('routineCard')) $('routineCard').onclick=()=>{st.mode='routine';save(st);apply(st);toast('Routine Mode')};
     if($('researchCard')) $('researchCard').onclick=()=>{st.mode='research';save(st);apply(st);toast('Research Mode')};
     if($('btnApplyTheme')) $('btnApplyTheme').onclick=()=>{st.theme=$('themeSelect').value;st.accent=$('accentSelect').value;save(st);apply(st);toast('Đã áp dụng giao diện')};
-    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v15-energy-column-parser',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
+    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v17-energy-column-parser',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
     if($('btnImportSettings')) $('btnImportSettings').onclick=()=>$('importSettingsFile').click();
     if($('importSettingsFile')) $('importSettingsFile').onchange=e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{try{const j=JSON.parse(String(rd.result||'{}')); st=Object.assign({},defaults,j.settings||j);save(st);apply(st);toast('Đã khôi phục')}catch(err){toast('File JSON không hợp lệ')}}; rd.readAsText(f);};
     if($('btnClearCache')) $('btnClearCache').onclick=async()=>{try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs)await r.unregister()} if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k)} toast('Đã xóa cache, tải lại trang')}catch(e){toast('Không xóa được cache')}};

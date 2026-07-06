@@ -1,3 +1,4 @@
-# NORM CeBr3 Mobile v15
+NORM CeBr3 Mobile v17
 
-Sửa parser report bGamma: chỉ đọc bảng TableRes và dùng đúng cột Position [keV] thay vì Channel.
+- Sửa ô Dung sai khớp E trên Android: có thể xóa số cũ bằng phím Backspace rồi nhập số mới.
+- Parser vẫn giữ theo engine HTML gốc.
