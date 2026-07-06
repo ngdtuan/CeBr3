@@ -1,10 +1,3 @@
-# NORM CeBr3 Mobile Stable v7
+# NORM CeBr3 Mobile v6
 
-Bản cập nhật sửa lỗi JavaScript hiện ra ngoài giao diện và chống tràn ngang trên Android.
-
-Triển khai trên GitHub Pages:
-1. Upload đè toàn bộ file trong gói này lên repository `CeBr3`.
-2. Vào Settings → Pages → Deploy from branch → main → /(root).
-3. Mở: https://ngdtuan.github.io/CeBr3/
-
-Sau khi upload, trên điện thoại nên xóa cache hoặc mở tab ẩn danh để tránh service worker cũ.
+Bản v6: bổ sung chức năng cho màn hình Cài đặt: Routine/Research, sáng/tối, màu nhấn, sao lưu/khôi phục JSON, đặt lại cấu hình, xoá lịch sử và xoá cache PWA.
