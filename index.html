@@ -114,7 +114,7 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v8 · Sửa cấu trúc màn hình Cài đặt hiển thị thật.</div>
+  <div class="drawerFooter">v9 · Android-safe · Cài đặt tĩnh, không dựng lại bằng JS.</div>
 </aside>
 
 <div class="app">
@@ -210,7 +210,7 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
   <div class="card"><div class="h"><span class="bar"></span>Thư viện tài liệu</div><p class="hint">Khu vực tích hợp SOP, chứng chỉ IAEA và tài liệu CeBr₃. Bản sau sẽ gắn file PDF/DOCX để mở trực tiếp trong app.</p><div class="toolGrid"><div class="toolCard"><b>RGU-1</b><small>Chứng chỉ chuẩn uranium</small></div><div class="toolCard"><b>RGTh-1</b><small>Chứng chỉ chuẩn thorium</small></div><div class="toolCard"><b>RGK-1</b><small>Chứng chỉ chuẩn kali</small></div><div class="toolCard"><b>SOP NORM</b><small>Quy trình đo và tính hoạt độ</small></div></div></div>
 </section>
 <section class="screen" id="screen-settings">
-  <div class="card" style="border-color:#67e8f9;background:#ecfeff"><div class="h"><span class="bar"></span>Cài đặt ứng dụng <span class="v7Badge">v8 thật</span></div><p class="hint"><b>Đã sửa lỗi trắng trang:</b> màn hình Cài đặt nằm đúng trong vùng ứng dụng và có nội dung hiển thị ngay cả khi JavaScript chưa kịp chạy.</p></div>
+  <div class="card" style="border-color:#67e8f9;background:#ecfeff"><div class="h"><span class="bar"></span>Cài đặt ứng dụng <span class="v7Badge">v9 Android-safe</span></div><p class="hint"><b>Bản kiểm tra Android:</b> nội dung Cài đặt được đặt trực tiếp trong HTML, không phụ thuộc JavaScript.</p></div>
   <div class="card"><div class="h"><span class="bar"></span>Cài đặt ứng dụng</div>
     <p class="hint">Các mục trong màn hình này đã có chức năng. Cài đặt được lưu trên thiết bị bằng localStorage.</p>
     <div class="modeBox">
@@ -246,7 +246,7 @@ body.theme-dark .settingTile,body.theme-dark .settingsRow,body.theme-dark .seg b
   <div class="card"><div class="h"><span class="bar" style="background:#334155"></span>Thông tin</div>
     <div class="quality">
       <div class="qitem"><span>Ứng dụng</span><b>NORM CeBr₃ Mobile</b></div>
-      <div class="qitem"><span>Phiên bản UI</span><b>v8-settings-structure-fixed</b></div>
+      <div class="qitem"><span>Phiên bản UI</span><b>v9-android-safe</b></div>
       <div class="qitem"><span>Chế độ hiện tại</span><b id="currentModeLabel">Routine</b></div>
     </div>
   </div>
@@ -371,94 +371,36 @@ renderLoaded();renderHistory();
 </script>
 
 <script>
+// v9 Android-safe: không dựng lại trang Cài đặt bằng innerHTML; chỉ gắn chức năng lên HTML tĩnh.
 (function(){
-  const $ = (id)=>document.getElementById(id);
-  const LS='norm_cebr3_mobile_v7_settings';
-  const defaults={mode:'routine',theme:'light',accent:'teal',autoSave:true,showQA:true,confirmDelete:true,language:'vi'};
+  const $=(id)=>document.getElementById(id);
+  const LS='norm_cebr3_mobile_v9_settings';
+  const defaults={mode:'routine',theme:'light',accent:'teal',autoSave:true,showQA:true,confirmDelete:true};
   function load(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){return {...defaults}}}
   function save(st){localStorage.setItem(LS,JSON.stringify(st));}
-  function toast2(msg){const t=$('toast'); if(t){t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}else alert(msg)}
+  function toast(msg){const t=$('toast'); if(t){t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600)}}
   function apply(st){
     document.body.classList.remove('theme-dark','theme-blue','theme-green','theme-violet');
     if(st.theme==='dark') document.body.classList.add('theme-dark');
     if(st.accent && st.accent!=='teal') document.body.classList.add('theme-'+st.accent);
     const cm=$('currentModeLabel'); if(cm) cm.textContent=st.mode==='research'?'Research':'Routine';
+    const r=$('routineCard'), q=$('researchCard'); if(r&&q){r.classList.toggle('on',st.mode==='routine'); q.classList.toggle('on',st.mode==='research')}
   }
-  function settingsHTML(st){return `
-  <div class="settingsPanel">
-    <div class="settingTile">
-      <div class="settingTitle">🔧 Cài đặt ứng dụng <span class="v7Badge">v8 thật</span></div>
-      <p class="settingDesc">Màn hình này được dựng bằng mã v7. Các lựa chọn được lưu trên thiết bị và có hiệu lực khi mở lại ứng dụng.</p>
-      <div class="seg">
-        <button id="v7ModeRoutine" class="${st.mode==='routine'?'on':''}">Routine Mode<br><small>Đo thường quy</small></button>
-        <button id="v7ModeResearch" class="${st.mode==='research'?'on':''}">Research Mode<br><small>Phân tích sâu</small></button>
-      </div>
-    </div>
-    <div class="settingTile">
-      <div class="settingTitle">🎨 Giao diện</div>
-      <div class="settingsGrid two">
-        <div class="field"><label>Chế độ màu</label><select id="v7Theme"><option value="light">Sáng</option><option value="dark">Tối</option></select></div>
-        <div class="field"><label>Màu nhấn</label><select id="v7Accent"><option value="teal">Xanh ngọc</option><option value="blue">Xanh dương</option><option value="green">Xanh lá</option><option value="violet">Tím</option></select></div>
-      </div>
-      <button class="btn secondary" id="v7Apply">ÁP DỤNG</button>
-    </div>
-    <div class="settingTile">
-      <div class="settingTitle">🧪 Cấu hình phân tích</div>
-      <div class="settingsGrid">
-        <label class="settingsRow"><span><b>Hiển thị chỉ số QA/QC</b><small>Gaussian ratio, Net/Continuum, cảnh báo đỉnh yếu.</small></span><input id="v7ShowQA" class="switch" type="checkbox"></label>
-        <label class="settingsRow"><span><b>Tự lưu cấu hình</b><small>Tự ghi thông tin chuẩn/phông và lựa chọn đỉnh vào bộ nhớ cục bộ.</small></span><input id="v7AutoSave" class="switch" type="checkbox"></label>
-        <label class="settingsRow"><span><b>Xác nhận trước khi xóa</b><small>Giảm nguy cơ xóa nhầm lịch sử đo.</small></span><input id="v7ConfirmDelete" class="switch" type="checkbox"></label>
-      </div>
-    </div>
-    <div class="settingTile">
-      <div class="settingTitle">💾 Sao lưu & khôi phục</div>
-      <p class="settingDesc">Xuất hoặc nhập file JSON chứa cấu hình giao diện và các lựa chọn vận hành.</p>
-      <input id="v7ImportFile" type="file" accept=".json,application/json" class="hidden">
-      <div class="settingsGrid two">
-        <button class="btn secondary" id="v7Export">⬇ SAO LƯU JSON</button>
-        <button class="btn gray" id="v7Import">⬆ KHÔI PHỤC JSON</button>
-      </div>
-    </div>
-    <div class="settingTile">
-      <div class="settingTitle">📱 PWA & bộ nhớ đệm</div>
-      <p class="settingDesc">Dùng khi GitHub Pages đã cập nhật nhưng điện thoại vẫn giữ bản cũ.</p>
-      <button class="btn secondary" id="v7ClearSW">XÓA CACHE / SERVICE WORKER</button>
-    </div>
-    <div class="settingTile dangerZone">
-      <div class="settingTitle">⚠️ Vùng nguy hiểm</div>
-      <div class="settingsGrid two">
-        <button class="btn gray" id="v7Reset">ĐẶT LẠI CÀI ĐẶT</button>
-        <button class="btn red" id="v7ClearLocal">XÓA LOCAL STORAGE</button>
-      </div>
-    </div>
-    <div class="settingTile">
-      <div class="settingTitle">ℹ️ Thông tin phiên bản</div>
-      <div class="quality">
-        <div class="qitem"><span>Ứng dụng</span><b>NORM CeBr₃ Mobile</b></div>
-        <div class="qitem"><span>Phiên bản</span><b>v8-settings-structure-fixed</b></div>
-        <div class="qitem"><span>Trạng thái</span><b>Cài đặt hoạt động thật</b></div>
-      </div>
-    </div>
-  </div>`}
   function bind(){
-    let st=load();
-    const root=$('screen-settings'); if(!root) return;
-    root.innerHTML=settingsHTML(st); apply(st);
-    $('v7Theme').value=st.theme; $('v7Accent').value=st.accent;
-    $('v7ShowQA').checked=!!st.showQA; $('v7AutoSave').checked=!!st.autoSave; $('v7ConfirmDelete').checked=!!st.confirmDelete;
-    $('v7ModeRoutine').onclick=()=>{st.mode='routine';save(st);bind();toast2('Đã chuyển Routine Mode')};
-    $('v7ModeResearch').onclick=()=>{st.mode='research';save(st);bind();toast2('Đã chuyển Research Mode')};
-    $('v7Apply').onclick=()=>{st.theme=$('v7Theme').value;st.accent=$('v7Accent').value;save(st);apply(st);toast2('Đã áp dụng giao diện')};
-    ['ShowQA','AutoSave','ConfirmDelete'].forEach(k=>{const el=$('v7'+k); if(el) el.onchange=()=>{st[k.charAt(0).toLowerCase()+k.slice(1)]=el.checked;save(st);toast2('Đã lưu cài đặt')}});
-    $('v7Export').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v8-settings-structure-fixed',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v7.json';a.click();URL.revokeObjectURL(a.href)};
-    $('v7Import').onclick=()=>$('v7ImportFile').click();
-    $('v7ImportFile').onchange=(e)=>{const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{try{const j=JSON.parse(r.result); st=Object.assign({},defaults,j.settings||j); save(st); bind(); toast2('Đã khôi phục cài đặt')}catch(err){toast2('File JSON không hợp lệ')}}; r.readAsText(f);};
-    $('v7ClearSW').onclick=async()=>{try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations(); for(const reg of regs) await reg.unregister();} if(window.caches){const keys=await caches.keys(); for(const k of keys) await caches.delete(k);} toast2('Đã xóa cache. Hãy tải lại trang.')}catch(e){toast2('Không xóa được cache')}};
-    $('v7Reset').onclick=()=>{st={...defaults};save(st);bind();toast2('Đã đặt lại cài đặt')};
-    $('v7ClearLocal').onclick=()=>{if(confirm('Xóa toàn bộ localStorage của ứng dụng?')){localStorage.clear();st={...defaults};save(st);bind();toast2('Đã xóa localStorage')}};
+    let st=load(); apply(st);
+    if($('themeSelect')) $('themeSelect').value=st.theme;
+    if($('accentSelect')) $('accentSelect').value=st.accent;
+    if($('routineCard')) $('routineCard').onclick=()=>{st.mode='routine';save(st);apply(st);toast('Routine Mode')};
+    if($('researchCard')) $('researchCard').onclick=()=>{st.mode='research';save(st);apply(st);toast('Research Mode')};
+    if($('btnApplyTheme')) $('btnApplyTheme').onclick=()=>{st.theme=$('themeSelect').value;st.accent=$('accentSelect').value;save(st);apply(st);toast('Đã áp dụng giao diện')};
+    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v9-android-safe',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
+    if($('btnImportSettings')) $('btnImportSettings').onclick=()=>$('importSettingsFile').click();
+    if($('importSettingsFile')) $('importSettingsFile').onchange=e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{try{const j=JSON.parse(String(rd.result||'{}')); st=Object.assign({},defaults,j.settings||j);save(st);apply(st);toast('Đã khôi phục')}catch(err){toast('File JSON không hợp lệ')}}; rd.readAsText(f);};
+    if($('btnClearCache')) $('btnClearCache').onclick=async()=>{try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs)await r.unregister()} if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k)} toast('Đã xóa cache, tải lại trang')}catch(e){toast('Không xóa được cache')}};
+    if($('btnResetConfig')) $('btnResetConfig').onclick=()=>{st={...defaults};save(st);apply(st);toast('Đã đặt lại')};
+    if($('btnClearHistory')) $('btnClearHistory').onclick=()=>{localStorage.removeItem('norm_mobile_history');toast('Đã xóa lịch sử')};
   }
-  document.addEventListener('DOMContentLoaded',bind);
-  setTimeout(bind,300);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind); else bind();
 })();
 </script>
 
