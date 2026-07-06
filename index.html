@@ -120,7 +120,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
     <button class="drawerBtn" id="routineModeBtn"><span class="dico">✅</span>Routine Mode</button>
     <button class="drawerBtn" id="researchModeBtn"><span class="dico">🔬</span>Research Mode</button>
   </div>
-  <div class="drawerFooter">v14 · Parser gốc NORM_cong_cu.html: E=cells[4], Area=cells[12], σ=cells[13].</div>
+  <div class="drawerFooter">v16 · Parser gốc NORM_cong_cu.html: HTML bGamma đọc đúng cells[4]/[12]/[13], không fallback quét số HTML.</div>
 </aside>
 
 <div class="app">
@@ -255,7 +255,7 @@ body.theme-dark .parseCard{background:#111827;border-color:#263244}body.theme-da
   <div class="card"><div class="h"><span class="bar" style="background:#334155"></span>Thông tin</div>
     <div class="quality">
       <div class="qitem"><span>Ứng dụng</span><b>NORM CeBr₃ Mobile</b></div>
-      <div class="qitem"><span>Phiên bản UI</span><b>v12-shared-tolerance</b></div>
+      <div class="qitem"><span>Phiên bản UI</span><b>v16-original-parser</b></div>
       <div class="qitem"><span>Chế độ hiện tại</span><b id="currentModeLabel">Routine</b></div>
     </div>
   </div>
@@ -291,21 +291,19 @@ $('measureDate').value=new Date().toISOString().slice(0,10);
 function num(t){t=String(t??'').trim().replace(/\s/g,'');if(t.includes('.')&&t.includes(','))t=t.replace(/,/g,'');else if(t.includes(',')&&!t.includes('.'))t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?v:null}
 function parsePaste(text){const out=[];for(const line of text.split(/\r?\n/)){const c=line.trim().split(/[\t;]+|\s{2,}|\s+/).filter(Boolean);if(c.length<3)continue;const E=num(c[0]),area=num(c[1]),sig=num(c[2]);if(E!=null&&area!=null&&sig!=null)out.push({E,area,sig});}return out}
 function parseBGammaHTML(html){
-  // Parser gốc từ NORM_cong_cu.html: chỉ nhận bảng kết quả peak của bGamma
-  // và lấy đúng các cột cố định: E keV=cells[4], Fitted area=cells[12], σ=cells[13].
-  // Không quét bảng khác, không suy luận theo Channel.
+  /* v16: lấy nguyên logic parser từ NORM_cong_cu.html gốc. */
   const doc=new DOMParser().parseFromString(html,"text/html");
   const tables=doc.querySelectorAll("table");
   for(const tbl of tables){
     const trs=tbl.querySelectorAll("tr");if(!trs.length)continue;
-    const head=(trs[0].innerText||"").toLowerCase();
+    const head=(trs[0].innerText||trs[0].textContent||"").toLowerCase();
     if(!head.includes("peaklabel")&&!(head.includes("area")&&head.includes("kev")))continue;
     const out=[];
     for(let i=1;i<trs.length;i++){
-      const cells=Array.from(trs[i].querySelectorAll("td,th")).map(c=>c.innerText.trim());
+      const cells=Array.from(trs[i].querySelectorAll("td,th")).map(c=>(c.innerText||c.textContent||"").trim());
       if(cells.length<14)continue;
-      const E=num(cells[4]),a=num(cells[12]),sg=num(cells[13]);
-      if(E!=null&&a!=null&&sg!=null)out.push({E,area:a,sig:sg});
+      const E=num(cells[4]),area=num(cells[12]),sig=num(cells[13]);
+      if(E!=null&&area!=null&&sig!=null)out.push({E,area,sig});
     }
     if(out.length)return out;
   }
@@ -346,7 +344,7 @@ function renderParsePreview(){
 }
 
 $('dropZone').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>{if(e.target.files[0])loadFile(e.target.files[0]);e.target.value=''};['dragover','drop'].forEach(ev=>$('dropZone').addEventListener(ev,e=>{e.preventDefault();if(ev==='drop'&&e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])}));
-function loadFile(file){const k=$('targetBlock').value;const rd=new FileReader();rd.onload=()=>{const txt=String(rd.result||'');let rows=file.name.match(/\.html?$/i)?parseBGammaHTML(txt):parsePaste(txt);if(!rows||!rows.length)rows=parsePaste(txt);if(!rows||!rows.length){toast('Không đọc được file: '+file.name);return}state.blocks[k]=rows;state.loaded[k]=file.name;renderLoaded();renderParsePreview();toast('Đã nạp '+file.name+' vào '+k+' · '+rows.length+' dòng')};rd.readAsText(file)}
+function loadFile(file){const k=$('targetBlock').value;const rd=new FileReader();rd.onload=()=>{const txt=String(rd.result||'');const isHtmlFile=/\.html?$/i.test(file.name)||/<table|<html|<!doctype/i.test(txt);let rows=isHtmlFile?parseBGammaHTML(txt):parsePaste(txt);if(!rows||!rows.length){toast(isHtmlFile?'Không đọc được bảng report bGamma bằng parser gốc: '+file.name:'Không đọc được file: '+file.name);return}state.blocks[k]=rows;state.loaded[k]=file.name;renderLoaded();renderParsePreview();toast('Đã nạp '+file.name+' vào '+k+' · '+rows.length+' dòng')};rd.readAsText(file)}
 $('btnApplyConfig').onclick=()=>{readInputs();localStorage.setItem('norm_tolE',String(state.cfg.tol));renderTolInfo();renderParsePreview();toast('Đã lưu cấu hình và phân tích lại report với dung sai ±'+state.cfg.tol+' keV')};
 $('btnRunCalc').onclick=()=>{readInputs();const log=$('calcLog');log.innerHTML='';const steps=['Kiểm tra file phổ','Trích xuất các ROI','Trừ nền/phông theo cấu hình','Tính hệ số CF từ mẫu chuẩn','Tính hoạt độ các nuclide','Tổng hợp kết quả'];let i=0;$('prog').style.width='0%';$('calcStatus').textContent='Đang tính hoạt độ...';const timer=setInterval(()=>{if(i<steps.length){log.innerHTML+=`<li><span>${steps[i]}</span><span class="ok">✓</span></li>`;$('prog').style.width=Math.round((i+1)/steps.length*100)+'%';i++;}else{clearInterval(timer);compute();$('calcStatus').textContent='Hoàn tất tính toán.';document.getElementById('st3').classList.remove('active');document.getElementById('st3').classList.add('done');document.getElementById('st4').classList.add('done');toast('Tính xong');setTimeout(()=>go('result'),500)}},220)};
 function renderResults(){const {per,summary}=compute();$('sampleInfo').innerHTML=`<b>${esc(state.sample.name)}</b> · ${esc(state.sample.matrix)} · m = ${vn(state.sample.m,4)} kg · t = ${vn(state.sample.t,0)} s`;$('resultCards').innerHTML=['Ra-226','Ra-228','Th-228','K-40'].map(n=>{const s=summary.find(x=>x.nuc===n),c=COLORS[n];return `<div class="rescard" style="background:${c}"><div class="nu">${n}</div>${s?`<div class="val">${vn(s.mean,1)}</div><div class="u">± ${vn(s.uc,1)} Bq/kg · ${vn(s.urel*100,1)}%</div><div class="u">${s.n} đỉnh${s.chi2!=null?' · χ²ᵣ '+vn(s.chi2,2):''}</div>`:'<div class="u">Thiếu dữ liệu</div>'}</div>`}).join('');$('peakTable').innerHTML='<thead><tr><th>E (keV)</th><th>Đồng vị</th><th>CF</th><th>A tổng</th><th>C mẫu</th><th>u %</th><th>MDA</th><th>Phông</th></tr></thead><tbody>'+per.map(r=>`<tr><td>${r.E}</td><td>${r.nuc} → ${r.to}</td>${r.ok?`<td>${vn(r.CF,4)}</td><td>${vn(r.Atot,2)}</td><td><b>${vn(r.Cmau,2)}</b></td><td>${vn(r.urel*100,1)}</td><td>${vn(r.MDA,2)}</td><td>${r.doBg?(r.bgAdequate?'✓':'⚠'):'—'}</td>`:`<td colspan="6">${r.reason}</td>`}</tr>`).join('')+'</tbody>';const warn=per.filter(r=>r.ok&&r.doBg&&!r.bgAdequate).length;$('qualityBox').innerHTML=`<div class="qitem"><span>Đỉnh phân tích hợp lệ</span><b>${per.filter(r=>r.ok).length}/${PEAKS.length}</b></div><div class="qitem"><span>Độ phù hợp phông</span><b>${warn?'Cần xem lại':'Đạt'}</b></div><div class="qitem"><span>Trạng thái</span><b>${summary.length?'Có kết quả':'Thiếu dữ liệu'}</b></div>`;renderHistory()}
@@ -429,7 +427,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
 </script>
 
 <script>
-// v14 Parser: dùng nguyên logic parseBGammaHTML của NORM_cong_cu.html gốc; dung sai khớp E lấy từ Cấu hình.
+// v16 Parser: trích logic parseBGammaHTML từ NORM_cong_cu.html gốc; HTML report không fallback quét số tự do.
 (function(){
   const $=(id)=>document.getElementById(id);
   const LS='norm_cebr3_mobile_v9_settings';
@@ -451,7 +449,7 @@ renderLoaded();renderTolInfo();renderParsePreview();renderHistory();
     if($('routineCard')) $('routineCard').onclick=()=>{st.mode='routine';save(st);apply(st);toast('Routine Mode')};
     if($('researchCard')) $('researchCard').onclick=()=>{st.mode='research';save(st);apply(st);toast('Research Mode')};
     if($('btnApplyTheme')) $('btnApplyTheme').onclick=()=>{st.theme=$('themeSelect').value;st.accent=$('accentSelect').value;save(st);apply(st);toast('Đã áp dụng giao diện')};
-    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v14-energy-column-parser',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
+    if($('btnExportSettings')) $('btnExportSettings').onclick=()=>{const blob=new Blob([JSON.stringify({version:'v15-energy-column-parser',time:new Date().toISOString(),settings:st},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NORM_CeBr3_settings_v9.json';a.click();URL.revokeObjectURL(a.href)};
     if($('btnImportSettings')) $('btnImportSettings').onclick=()=>$('importSettingsFile').click();
     if($('importSettingsFile')) $('importSettingsFile').onchange=e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{try{const j=JSON.parse(String(rd.result||'{}')); st=Object.assign({},defaults,j.settings||j);save(st);apply(st);toast('Đã khôi phục')}catch(err){toast('File JSON không hợp lệ')}}; rd.readAsText(f);};
     if($('btnClearCache')) $('btnClearCache').onclick=async()=>{try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs)await r.unregister()} if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k)} toast('Đã xóa cache, tải lại trang')}catch(e){toast('Không xóa được cache')}};
